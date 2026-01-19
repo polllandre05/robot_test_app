@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <!-- Primary -->
-    <color name="color_primary">#5C8DC5</color>
+    <color name="color_primary">#F29F67</color>
 
     <!-- Secondary -->
     <color name="color_secondary">#AD9E90</color>
 
     <!-- Background / Surface -->
-    <color name="color_background">#909EAE</color>
+    <color name="color_background">#d3d3d3</color>
 
     <!-- Text -->
-    <color name="color_text_primary">#736F60</color>
-    <color name="color_text_secondary">#B3736F60</color>
+    <color name="color_text_primary">#1E1E2C</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 </resources>
