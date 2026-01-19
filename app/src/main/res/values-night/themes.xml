@@ -1,0 +1,17 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.Robot_test_app" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Material 3 color mapping -->
+        <item name="colorPrimary">@color/color_primary</item>
+        <item name="colorSecondary">@color/color_secondary</item>
+
+        <item name="colorBackgroundFloating">@color/color_background</item>
+        <item name="colorSurface">@color/color_background</item>
+
+        <!-- Text -->
+        <item name="android:textColorPrimary">
+            @color/color_text_primary
+        </item>
+        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+    </style>
+</resources>
