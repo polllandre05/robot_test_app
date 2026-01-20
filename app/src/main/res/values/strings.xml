@@ -1,3 +1,8 @@
 <resources>
-    <string name="app_name">Robot_test_app_KT</string>
+    <string name="app_name">Robot_test_app</string>
+    <string name="text_prompt">Enter prompt:</string>
+    <string name="button_tokenize">Tokenize</string>
+    <string name="tokenized_output_title">Output:</string>
+    <string name="sample_title">Robot Test App</string>
+    <string name="signature_text">Ⓒ 2026 - IFELSE PH</string>
 </resources>

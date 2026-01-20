@@ -5,15 +5,125 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/color_background"
     tools:context=".MainActivity">
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"
+        android:id="@+id/title_textbox"
+        android:layout_width="294dp"
+        android:layout_height="67dp"
+        android:fontFamily="@font/space_grotesk_medium"
+        android:text="@string/sample_title"
+        android:textAlignment="center"
+        android:textSize="34sp"
+        android:textColor="@color/color_text_primary"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.150" />
+
+    <LinearLayout
+        android:id="@+id/prompt_container"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        android:layout_margin="40dp"
+        android:background="@drawable/bg_prompt_bar"
+        android:elevation="10dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingEnd="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/signature_textview"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias=".55">
+
+        <!-- Prompt input -->
+        <EditText
+            android:id="@+id/prompt_textbox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@null"
+            android:ellipsize="start"
+            android:fontFamily="@font/space_grotesk_medium"
+            android:hint="@string/text_prompt"
+            android:importantForAutofill="no"
+            android:inputType="text"
+            android:maxLines="1"
+            android:singleLine="true"
+            android:textColor="@color/color_text_primary"
+            android:textColorHint="@color/color_text_primary"
+            android:textSize="16sp" />
+
+        <!-- Mic button -->
+        <ImageButton
+            android:id="@+id/mic_button"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Voice input"
+            android:src="@drawable/mic_icon" />
+
+        <!-- Send button -->
+        <ImageButton
+            android:id="@+id/tokenize_button"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Send"
+            android:src="@drawable/send_icon" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/output_title_textbox"
+        android:layout_width="146dp"
+        android:layout_height="34dp"
+        android:layout_marginBottom="392dp"
+        android:fontFamily="@font/space_grotesk_medium"
+        android:text="@string/tokenized_output_title"
+        android:textColor="@color/color_text_primary"
+        android:textSize="14sp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.109"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/title_textbox"
+        app:layout_constraintVertical_bias="0.351" />
+
+    <TextView
+        android:id="@+id/output_textbox"
+        android:layout_width="349dp"
+        android:layout_height="244dp"
+        android:fontFamily="@font/space_grotesk_medium"
+        android:text=""
+        android:textColor="@color/color_text_primary"
+        android:textSize="14sp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/prompt_container"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.491"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/output_title_textbox"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <TextView
+        android:id="@+id/signature_textview"
+        android:layout_width="216dp"
+        android:layout_height="29dp"
+        android:fontFamily="@font/space_grotesk_medium"
+        android:text="@string/signature_text"
+        android:textAlignment="center"
+        android:textColor="@color/color_text_primary"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.977" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
