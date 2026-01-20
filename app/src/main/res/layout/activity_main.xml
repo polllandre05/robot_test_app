@@ -21,7 +21,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.136" />
+        app:layout_constraintVertical_bias="0.150" />
 
     <LinearLayout
         android:id="@+id/prompt_container"
@@ -34,12 +34,11 @@
         android:orientation="horizontal"
         android:paddingStart="16dp"
         android:paddingEnd="8dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/signature_textview"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.475"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/title_textbox"
-        app:layout_constraintVertical_bias="1.0">
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias=".55">
 
         <!-- Prompt input -->
         <EditText
@@ -56,8 +55,7 @@
             android:maxLines="1"
             android:singleLine="true"
             android:textColor="@color/color_text_primary"
-            android:textColorHint="@color/color_text_primary"
-            />
+            android:textColorHint="@color/color_text_primary" />
 
         <!-- Mic button -->
         <ImageButton
@@ -82,30 +80,46 @@
         android:id="@+id/output_title_textbox"
         android:layout_width="146dp"
         android:layout_height="34dp"
-        android:text="@string/tokenized_output_title"
-        android:visibility="invisible"
+        android:layout_marginBottom="392dp"
         android:fontFamily="@font/space_grotesk_medium"
+        android:text="@string/tokenized_output_title"
         android:textColor="@color/color_text_primary"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.143"
+        app:layout_constraintHorizontal_bias="0.109"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/prompt_container"
-        app:layout_constraintVertical_bias="0.145" />
+        app:layout_constraintTop_toBottomOf="@+id/title_textbox"
+        app:layout_constraintVertical_bias="0.351" />
 
     <TextView
         android:id="@+id/output_textbox"
-        android:layout_width="352dp"
-        android:layout_height="123dp"
-        android:text=""
-        android:visibility="invisible"
+        android:layout_width="349dp"
+        android:layout_height="244dp"
         android:fontFamily="@font/space_grotesk_medium"
+        android:text=""
         android:textColor="@color/color_text_primary"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/prompt_container"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.491"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/output_title_textbox"
-        app:layout_constraintVertical_bias="0.087" />
+        app:layout_constraintVertical_bias="0.0" />
+
+    <TextView
+        android:id="@+id/signature_textview"
+        android:layout_width="216dp"
+        android:layout_height="29dp"
+        android:fontFamily="@font/space_grotesk_medium"
+        android:text="@string/signature_text"
+        android:textAlignment="center"
+        android:textColor="@color/color_text_primary"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.977" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

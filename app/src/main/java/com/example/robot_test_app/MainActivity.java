@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.speech.RecognizerIntent;
 import android.transition.AutoTransition;
 import android.transition.Transition;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -28,6 +29,9 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.transition.TransitionManager;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Objects;
@@ -37,9 +41,11 @@ public class MainActivity extends AppCompatActivity {
 
     TextView outputTitleTextView;
     TextView outputTextView;
+    EditText prompt_textbox;
     ImageButton sendButton;
     ImageButton micButton;
-    EditText prompt_textbox;
+    ConstraintLayout root;
+    ConstraintSet set;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +59,8 @@ public class MainActivity extends AppCompatActivity {
         sendButton = findViewById(R.id.tokenize_button);
         micButton = findViewById(R.id.mic_button);
         prompt_textbox = findViewById(R.id.prompt_textbox);
+        root = findViewById(R.id.main);
+        set = new ConstraintSet();
 
         // Handle window insets for edge-to-edge display
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -61,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
+        // Request audio recording permission
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
@@ -68,43 +77,32 @@ public class MainActivity extends AppCompatActivity {
                     REQUEST_RECORD_AUDIO_PERMISSION);
         }
 
-        // Set action listener for the prompt textbox to handle "Done" action
-        prompt_textbox.setOnEditorActionListener((v, actionId, event) -> {
-            if(actionId == EditorInfo.IME_ACTION_DONE ||
-                    actionId == EditorInfo.IME_ACTION_SEARCH ||
-                    (event != null) && event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
-                sendButton.performClick();
-                return true;
-            }
-            return false;
-        });
+        // Set action listener for the prompt textbox
+        // Trigger send button click when "Enter" key is pressed
+        registerEnterEvent();
 
         // Set click listener for the tokenize button
         sendButton.setOnClickListener(v -> {
             collapse_keyboard(v);
-            Tokenizer tokenizer = new Tokenizer();
             String inputText = ((TextView) findViewById(R.id.prompt_textbox)).getText().toString();
             if(validate_input(inputText)) {
-//                Object tokenizedOutput = tokenizer.string_to_JSON(inputText);
-//                outputTextView.setText(tokenizedOutput.toString());
-                outputTextView.setText(inputText);
+                try {
+                    JSONObject jsonOutput = new JSONObject();
+                    jsonOutput.put("prompt_message", inputText);
 
-                outputTitleTextView.setVisibility(View.VISIBLE);
-                outputTextView.setVisibility(View.VISIBLE);
+                    outputTextView.setText(jsonOutput.toString());
+                } catch (JSONException e) {
+                    Log.e(
+                            "RobotTestApp",
+                            "Failed to build JSON. inputText=\"" + inputText + "\"",
+                            e
+                    );
+                }
 
-                ConstraintLayout root = findViewById(R.id.main);
-                ConstraintSet set = new ConstraintSet();
-                set.clone(root);
+                setTextboxVisibility(outputTitleTextView, View.VISIBLE);
+                setTextboxVisibility(outputTextView, View.VISIBLE);
 
-                set.clear(R.id.prompt_container, ConstraintSet.BOTTOM);
-                set.connect(R.id.prompt_container, ConstraintSet.TOP, ConstraintSet.PARENT_ID, ConstraintSet.TOP);
-                set.connect(R.id.prompt_container, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM);
-                set.setVerticalBias(R.id.prompt_container, 0.5f);
-
-                Transition transition = new AutoTransition();
-                transition.setDuration(600);
-                TransitionManager.beginDelayedTransition(root);
-                set.applyTo(root);
+                transitionLayoutPosition();
             }
         });
 
@@ -114,9 +112,7 @@ public class MainActivity extends AppCompatActivity {
 
             speechIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
                     RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-
             speechIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
-
             speechIntent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Speak now...");
 
             try{
@@ -125,8 +121,33 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, " " + e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
 
+    public void setTextboxVisibility(TextView textview, int visibility){
+        textview.setVisibility(visibility);
+    }
+    // Set action listener for the prompt textbox to handle "Done" action
+    public void registerEnterEvent(){
+        prompt_textbox.setOnEditorActionListener((v, actionId, event) -> {
+            if(actionId == EditorInfo.IME_ACTION_DONE ||
+                    actionId == EditorInfo.IME_ACTION_SEARCH ||
+                    (event != null) && event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
+                sendButton.performClick();
+                return true;
+            }
+            return false;
+        });
+    }
 
+    // Animate the layout transition of the prompt container
+    public void transitionLayoutPosition(){
+        set.clone(root);
+        set.setVerticalBias(R.id.prompt_container, 1.0f);
+
+        Transition transition = new AutoTransition();
+        transition.setDuration(600);
+        TransitionManager.beginDelayedTransition(root);
+        set.applyTo(root);
     }
 
     // Handle the result from speech recognition activity
@@ -161,10 +182,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public boolean validate_input(String inputText) {
-        if (inputText == null || inputText.trim().isEmpty()) {
-            Toast.makeText(MainActivity.this, "Please enter a valid string!", Toast.LENGTH_SHORT).show();
-            return false;
-        } return true;
+        return inputText != null && !inputText.trim().isEmpty();
     }
 
     public void collapse_keyboard(View view){
