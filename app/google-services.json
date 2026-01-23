@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "556689855550",
+    "project_id": "robot-test-app2026",
+    "storage_bucket": "robot-test-app2026.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:556689855550:android:e79107c09f5a4e7640ed6f",
+        "android_client_info": {
+          "package_name": "com.example.robot_test_app_kt"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDkoUBcihYvywG0vvCdC4Qlfwq6Is-VTyM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

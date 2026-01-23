@@ -8,7 +8,6 @@ import android.speech.RecognizerIntent
 import android.transition.AutoTransition
 import android.transition.Transition
 import android.transition.TransitionManager
-import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
@@ -18,7 +17,6 @@ import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
-import androidx.annotation.Nullable
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
@@ -26,14 +24,12 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import org.json.JSONException
-import org.json.JSONObject
+import androidx.lifecycle.ViewModelProvider
 import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
     companion object {
-        private const val REQUEST_RECORD_AUDIO_PERMISSION = 1;
-        private const val TAG = "RobotTestApp";
+        private const val REQUEST_RECORD_AUDIO_PERMISSION = 1
     }
 
     private lateinit var outputTitleTextView: TextView
@@ -43,6 +39,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var micButton: ImageButton
     private lateinit var root: ConstraintLayout
     private lateinit var constraintSet: ConstraintSet
+    private lateinit var geminiModel: GeminiModelView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,6 +54,8 @@ class MainActivity : AppCompatActivity() {
         promptTextbox = findViewById(R.id.prompt_textbox)
         root = findViewById(R.id.main)
         constraintSet = ConstraintSet()
+        // gemini
+        geminiModel = ViewModelProvider(this)[GeminiModelView::class.java]
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -66,19 +65,25 @@ class MainActivity : AppCompatActivity() {
         requestAudioPermission()
         registerEnterEvent()
 
+
+        geminiModel.aiResponse.observe(this) {
+                responseText -> outputTextView.text = responseText
+        }
+
         sendButton.setOnClickListener {
             collapseKeyboard()
             val inputText = promptTextbox.text.toString()
 
             if (validateInput(inputText)) {
-                try {
-                    val jsonOutput = JSONObject().apply {
-                        put("prompt_message", inputText)
-                    }
-                    outputTextView.text = jsonOutput.toString()
-                } catch (e: JSONException) {
-                    Log.e(TAG, "Failed to build JSON. inputText=\"$inputText\"", e)
-                }
+//                try {
+//                    val jsonOutput = JSONObject().apply {
+//                        put("prompt_message", inputText)
+//                    }
+//                    outputTextView.text = jsonOutput.toString()
+//                } catch (e: JSONException) {
+//                    Log.e(TAG, "Failed to build JSON. inputText=\"$inputText\"", e)
+//                }
+                geminiModel.generateAIContent(inputText)
 
                 setTextboxVisibility(outputTitleTextView, View.VISIBLE)
                 setTextboxVisibility(outputTextView, View.VISIBLE)
@@ -153,7 +158,7 @@ class MainActivity : AppCompatActivity() {
     override fun onActivityResult(
         requestCode: Int,
         resultCode: Int,
-        @Nullable data: Intent?
+        data: Intent?
     ) {
         super.onActivityResult(requestCode, resultCode, data)
 

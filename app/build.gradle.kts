@@ -1,7 +1,10 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    // GEMINI ADDITION
+    id("com.google.gms.google-services")
 }
+
 
 android {
     namespace = "com.example.robot_test_app_kt"
@@ -46,4 +49,12 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-}
+    // GEMINI ADDITION
+    implementation(platform("com.google.firebase:firebase-bom:34.8.0"))
+    implementation("com.google.firebase:firebase-ai")
+
+    implementation("com.google.firebase:firebase-analytics")
+
+    implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.10.0")
+ }
