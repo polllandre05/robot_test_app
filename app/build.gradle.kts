@@ -12,6 +12,10 @@ android {
         version = release(36)
     }
 
+    buildFeatures {
+        viewBinding = true
+    }
+
     defaultConfig {
         applicationId = "com.example.robot_test_app_kt"
         minSdk = 29

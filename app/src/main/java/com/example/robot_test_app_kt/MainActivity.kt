@@ -1,189 +1,116 @@
 package com.example.robot_test_app_kt
 
-import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.speech.RecognizerIntent
-import android.transition.AutoTransition
-import android.transition.Transition
-import android.transition.TransitionManager
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
-import android.view.inputmethod.InputMethodManager
-import android.widget.EditText
-import android.widget.ImageButton
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModelProvider
-import java.util.Locale
+import com.example.robot_test_app_kt.databinding.ActivityMainBinding // Import generated class
 
 class MainActivity : AppCompatActivity() {
     companion object {
         private const val REQUEST_RECORD_AUDIO_PERMISSION = 1
     }
-
-    private lateinit var outputTitleTextView: TextView
-    private lateinit var outputTextView: TextView
-    private lateinit var promptTextbox: EditText
-    private lateinit var sendButton: ImageButton
-    private lateinit var micButton: ImageButton
-    private lateinit var root: ConstraintLayout
-    private lateinit var constraintSet: ConstraintSet
+    private lateinit var binding: ActivityMainBinding
     private lateinit var geminiModel: GeminiModelView
+    private val constraintSet = ConstraintSet()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContentView(R.layout.activity_main)
 
-        // UI references
-        outputTitleTextView = findViewById(R.id.output_title_textbox)
-        outputTextView = findViewById(R.id.output_textbox)
-        sendButton = findViewById(R.id.tokenize_button)
-        micButton = findViewById(R.id.mic_button)
-        promptTextbox = findViewById(R.id.prompt_textbox)
-        root = findViewById(R.id.main)
-        constraintSet = ConstraintSet()
-        // gemini
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        binding.outputTextbox.movementMethod = android.text.method.ScrollingMovementMethod()
+        setContentView(binding.root)
+
         geminiModel = ViewModelProvider(this)[GeminiModelView::class.java]
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+        setupSystemBars()
+        setupObservers()
+        setupListeners()
+        registerEnterEvent()
+        binding.outputTextbox.scrollTo(0, 0)
+    }
+
+    private fun setupObservers() {
+        // Observes the "Thinking..." animation or the "Response:" header
+        geminiModel.titleText.observe(this) { status ->
+            binding.outputTitleTextbox.text = status
+        }
+
+        // Observes the actual AI answer
+        geminiModel.aiResponse.observe(this) { responseText ->
+            binding.outputTextbox.text = responseText
+        }
+    }
+
+    private fun setupListeners() {
+        binding.tokenizeButton.setOnClickListener {
+            handleSendAction()
+        }
+
+        binding.micButton.setOnClickListener {
+            val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+            }
+            try {
+                startActivityForResult(intent, REQUEST_RECORD_AUDIO_PERMISSION)
+            } catch (e: Exception) {
+                Toast.makeText(this, "Speech recognition not available", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        binding.promptTextbox.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                handleSendAction()
+                true
+            } else false
+        }
+    }
+
+    private fun handleSendAction() {
+        val inputText = binding.promptTextbox.text.toString()
+
+        if (inputText.isNotBlank()) {
+            hideKeyboard()
+
+            binding.outputTitleTextbox.visibility = View.VISIBLE
+            binding.outputTextbox.visibility = View.VISIBLE
+
+            geminiModel.generateAIContent(inputText)
+
+            binding.main.animateBias(constraintSet, R.id.prompt_container, 1.0f)
+        }
+    }
+
+    private fun registerEnterEvent() {
+        binding.promptTextbox.setOnEditorActionListener { _, actionId, event ->
+            // Check for specific IME actions OR the physical Enter key press
+            val isKeyboardDone = actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_SEARCH
+            val isPhysicalEnter = event?.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN
+
+            if (isKeyboardDone || isPhysicalEnter) {
+                handleSendAction() // Call the logic directly instead of performClick()
+                true // Consume the event
+            } else {
+                false // Pass the event on
+            }
+        }
+    }
+
+    private fun setupSystemBars() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.main) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        requestAudioPermission()
-        registerEnterEvent()
-
-
-        geminiModel.aiResponse.observe(this) {
-                responseText -> outputTextView.text = responseText
-        }
-
-        sendButton.setOnClickListener {
-            collapseKeyboard()
-            val inputText = promptTextbox.text.toString()
-
-            if (validateInput(inputText)) {
-//                try {
-//                    val jsonOutput = JSONObject().apply {
-//                        put("prompt_message", inputText)
-//                    }
-//                    outputTextView.text = jsonOutput.toString()
-//                } catch (e: JSONException) {
-//                    Log.e(TAG, "Failed to build JSON. inputText=\"$inputText\"", e)
-//                }
-                geminiModel.generateAIContent(inputText)
-
-                setTextboxVisibility(outputTitleTextView, View.VISIBLE)
-                setTextboxVisibility(outputTextView, View.VISIBLE)
-                transitionLayoutPosition()
-            }
-        }
-
-        micButton.setOnClickListener {
-            val speechIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-                putExtra(
-                    RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                    RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
-                )
-                putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
-                putExtra(RecognizerIntent.EXTRA_PROMPT, "Speak now...")
-            }
-
-            try {
-                startActivityForResult(speechIntent, REQUEST_RECORD_AUDIO_PERMISSION)
-            } catch (e: Exception) {
-                Toast.makeText(this, e.message ?: "Speech error", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
-
-    private fun requestAudioPermission() {
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.RECORD_AUDIO
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.RECORD_AUDIO),
-                REQUEST_RECORD_AUDIO_PERMISSION
-            )
-        }
-    }
-
-    private fun setTextboxVisibility(view: TextView, visibility: Int) {
-        view.visibility = visibility
-    }
-
-    private fun registerEnterEvent() {
-        promptTextbox.setOnEditorActionListener { _, actionId, event ->
-            if (
-                actionId == EditorInfo.IME_ACTION_DONE ||
-                actionId == EditorInfo.IME_ACTION_SEARCH ||
-                (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER)
-            ) {
-                sendButton.performClick()
-                true
-            } else {
-                false
-            }
-        }
-    }
-
-    private fun transitionLayoutPosition() {
-        constraintSet.clone(root)
-        constraintSet.setVerticalBias(R.id.prompt_container, 1.0f)
-
-        val transition: Transition = AutoTransition().apply {
-            duration = 600
-        }
-
-        TransitionManager.beginDelayedTransition(root, transition)
-        constraintSet.applyTo(root)
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onActivityResult(
-        requestCode: Int,
-        resultCode: Int,
-        data: Intent?
-    ) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == REQUEST_RECORD_AUDIO_PERMISSION &&
-            resultCode == RESULT_OK &&
-            data != null
-        ) {
-            val results = data.getStringArrayListExtra(
-                RecognizerIntent.EXTRA_RESULTS
-            )
-
-            if (!results.isNullOrEmpty()) {
-                promptTextbox.setText(results[0])
-                sendButton.performClick()
-            }
-        }
-    }
-
-    private fun validateInput(inputText: String?): Boolean {
-        return !inputText.isNullOrBlank()
-    }
-
-    private fun collapseKeyboard() {
-        val currentFocus = currentFocus ?: return
-        val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.hideSoftInputFromWindow(currentFocus.windowToken, 0)
     }
 }
